@@ -8,7 +8,6 @@ cdef extern from "./rainflow.h":
 
 
 cdef np.ndarray[ndim=1, dtype=CDOUBLE] sig2ext(np.ndarray[ndim=1, dtype=CDOUBLE] sig):
-    cdef int dt=1
     cdef np.ndarray[ndim=1, dtype=CDOUBLE] w1, ext
     w1 = np.diff(sig)
     test = (w1[:-1]*w1[1:]) <= 0
