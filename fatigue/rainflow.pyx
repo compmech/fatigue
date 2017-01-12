@@ -11,16 +11,20 @@ cdef np.ndarray[ndim=1, dtype=CDOUBLE] sig2ext(np.ndarray[ndim=1, dtype=CDOUBLE]
     cdef int dt=1
     cdef np.ndarray[ndim=1, dtype=CDOUBLE] w1, ext
     w1 = np.diff(sig)
-    ext = np.zeros_like(w1)
     test = (w1[:-1]*w1[1:]) <= 0
-    ext = np.concatenate((np.array([1.]), sig[test], np.array([1.])))
-
+    test[0] = True
+    test[-1] = True
+    ext = sig[test]
     w1 = np.diff(ext)
     test = (w1[:-1]==0) & (w1[1:]==0)
-    ext = np.concatenate((np.array([0.]), w1[~test], np.array([0.])))
+    test[0] = False
+    test[-1] = False
+    ext = w1[~test]
 
     test = ext[:-1]==ext[1:]
-    ext = np.concatenate((np.array([0.]), ext[~test], np.array([0.])))
+    test[0] = False
+    test[-1] = False
+    ext = ext[~test]
     if ext.shape[0] > 2:
         w1 = np.diff(ext)
         ext = w1[(w1[:-1]*w1[1:]) < 0]
@@ -28,11 +32,13 @@ cdef np.ndarray[ndim=1, dtype=CDOUBLE] sig2ext(np.ndarray[ndim=1, dtype=CDOUBLE]
 
 
 def rainflow(np.ndarray[ndim=1, dtype=CDOUBLE] points):
-    cdef int n = points.shape[0]
     cdef np.ndarray[ndim=1, dtype=CDOUBLE] ext
     cdef np.ndarray[ndim=2, dtype=CDOUBLE] array_out
-    array_out = np.zeros((n, 3), dtype=np.float64)
+    print(points)
     ext = sig2ext(points)
+    print(ext)
+    cdef int n = ext.shape[0]
+    array_out = np.zeros((n, 3), dtype=np.float64)
     rainflowc(n, &ext[0], &array_out[0, 0])
     return array_out
 
